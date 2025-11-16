@@ -29,8 +29,7 @@ cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, 0.1)
 
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("Using device: ", device)
 
