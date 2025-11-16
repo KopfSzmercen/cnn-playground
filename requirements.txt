@@ -1,0 +1,13 @@
+torch==2.9.1+cpu
+torchvision==0.24.1+cpu
+torchinfo==1.8.0
+numpy==2.3.3
+matplotlib==3.10.7
+seaborn==0.13.2
+scikit-learn==1.7.2
+tqdm==4.67.1
+Pillow==11.3.0
+
+# Optional / helpful utilities
+typing_extensions==4.15.0
+
