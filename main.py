@@ -8,6 +8,7 @@ from modules.visualizations import view_random_N_dataloader_images, plot_train_v
 from modules.confusion_matrix import plot_confusion_matrix_from_model
 from torchinfo import summary
 import os
+import argparse
 
 from modules.metrics import calculate_metrics
 
@@ -21,11 +22,22 @@ data_transform = transforms.Compose([
 ])
 
 
+parser = argparse.ArgumentParser(description="Train MobileNet on CIFAR-10 with options")
+parser.add_argument("--epochs", "-e", type=int, default=3, help="Number of training epochs (default: 3)")
+parser.add_argument("--percent", "-p", type=float, default=0.1, help="Fraction of dataset to use (0-1) or percent (1-100). Default=0.1 (10%%)")
+args = parser.parse_args()
+
 cifar_train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=data_transform)
 cifar_test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=data_transform)
 
-cifar_train_dataset = create_truncated_dataset(cifar_train_dataset, 0.1)
-cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, 0.1)
+percent = float(args.percent)
+if percent > 1:
+    percent = percent / 100.0
+if percent <= 0 or percent > 1:
+    raise ValueError("`--percent` must be in range (0, 1] when given as fraction or (0,100] when given as percentage")
+
+cifar_train_dataset = create_truncated_dataset(cifar_train_dataset, percent)
+cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, percent)
 
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
@@ -64,7 +76,9 @@ model.classifier = torch.nn.Sequential(
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
 
-EPOCHS = 3
+EPOCHS = int(args.epochs)
+
+print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
         input_size=(32, 3, 224, 224),
