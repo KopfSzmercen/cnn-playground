@@ -28,7 +28,7 @@ def train_step(
 
     train_loss, train_acc = 0, 0
 
-    for _, (X, y) in enumerate(tqdm(dataloader, desc="Training")):
+    for _, (X, y) in enumerate(tqdm(dataloader, desc="Training", miniters=20, mininterval=5)):
         X, y = X.to(device), y.to(device)
 
         y_pred = model(X)
@@ -79,7 +79,7 @@ def test_step(
     test_loss, test_acc = 0, 0
 
     with torch.inference_mode():
-        for _, (X, y) in enumerate(tqdm(dataloader, desc="Testing")):
+        for _, (X, y) in enumerate(tqdm(dataloader, desc="Testing", miniters=20, mininterval=5)):
 
             X, y = X.to(device), y.to(device)
 
@@ -167,17 +167,6 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
-
-        # writer.add_scalars(main_tag="Train_Metrics", 
-        #                    tag_scalar_dict={"train_loss": train_loss,
-        #                                     "train_acc": train_acc},
-        #                    global_step=epoch)
-
-        # writer.add_scalars(main_tag="Test_Metrics", 
-        #                    tag_scalar_dict={"test_loss": test_loss,
-        #                                     "test_acc": test_acc}, 
-        #                    global_step=epoch)
-        # writer.flush()
     
     return results
     
