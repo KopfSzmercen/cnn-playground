@@ -42,8 +42,6 @@ def calculate_metrics(
         output_dict=True
     )
 
-    print("Classification Report:")
-    print(report)
-    print()
+    print("Classification Report Generated.")
 
     return report

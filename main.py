@@ -4,7 +4,7 @@ from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
 from torchvision import transforms, datasets
 import torch
-from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress
+from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress, plot_classification_report, plot_classification_heatmap
 from modules.confusion_matrix import plot_confusion_matrix_from_model
 from torchinfo import summary
 import os
@@ -29,7 +29,11 @@ cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, 0.1)
 
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-device = torch.device("cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
+
+print("Using device: ", device)
+
 model.to(device)
 
 train_loader = torch.utils.data.DataLoader(
@@ -82,7 +86,7 @@ train_results = train(
     device=device
 )
 
-calculate_metrics(
+classification_report = calculate_metrics(
     model=model,
     dataloader=test_loader,
     device=device,
@@ -105,6 +109,17 @@ plot_confusion_matrix_from_model(
     figsize=(10, 8),
     save_path="results/confusion_matrix.png"
 )
+
+plot_classification_report(
+    class_report=classification_report,
+    fig_name="results/classification_report.png"
+)
+
+plot_classification_heatmap(
+    class_report=classification_report,
+    fig_name="results/classification_heatmap.png"
+)
+
 
 save_model(
     model=model,

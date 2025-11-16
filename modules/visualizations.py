@@ -2,6 +2,7 @@
 import random
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 from typing import Dict
 
 def view_random_N_dataloader_images(
@@ -73,4 +74,96 @@ def plot_train_val_progress(
 
     plt.tight_layout()
     plt.savefig(fig_name)
+    plt.show()
+
+
+def plot_classification_report(
+    class_report: Dict,
+    fig_name: str = "classification_report.png"
+):
+    """
+    Minimalist visualization of classification report metrics.
+    Shows precision, recall, and f1-score for each class in a grouped bar chart.
+    
+    Args:
+        class_report: dictionary from sklearn's classification_report
+        fig_name: name of the file to save the figure
+    """
+    # Extract class names and metrics (exclude accuracy and averages)
+    classes = [k for k in class_report.keys() if k not in ['accuracy', 'macro avg', 'weighted avg']]
+    
+    precisions = [class_report[c]['precision'] for c in classes]
+    recalls = [class_report[c]['recall'] for c in classes]
+    f1_scores = [class_report[c]['f1-score'] for c in classes]
+    
+    fig, ax = plt.subplots(figsize=(12, 5))
+    
+    x = np.arange(len(classes))
+    width = 0.25
+    
+    # Create bars
+    ax.bar(x - width, precisions, width, label='Precision', alpha=0.8)
+    ax.bar(x, recalls, width, label='Recall', alpha=0.8)
+    ax.bar(x + width, f1_scores, width, label='F1-Score', alpha=0.8)
+    
+    ax.set_xlabel('Class', fontsize=11)
+    ax.set_ylabel('Score', fontsize=11)
+    ax.set_title(f'Classification Report (Accuracy: {class_report["accuracy"]:.1%})', fontsize=12, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(classes, rotation=45, ha='right')
+    ax.set_ylim(0, 1)
+    ax.legend()
+    ax.grid(axis='y', alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(fig_name, dpi=150, bbox_inches='tight')
+    plt.show()
+
+
+def plot_classification_heatmap(
+    class_report: Dict,
+    fig_name: str = "classification_heatmap.png"
+):
+    """
+    Heatmap visualization of precision, recall, and f1-score.
+    Minimalist alternative showing all metrics in one view.
+    
+    Args:
+        class_report: dictionary from sklearn's classification_report
+        fig_name: name of the file to save the figure
+    """
+    # Extract class names and metrics
+    classes = [k for k in class_report.keys() if k not in ['accuracy', 'macro avg', 'weighted avg']]
+    
+    # Create matrix
+    metrics_matrix = np.array([
+        [class_report[c]['precision'] for c in classes],
+        [class_report[c]['recall'] for c in classes],
+        [class_report[c]['f1-score'] for c in classes]
+    ])
+    
+    # Create heatmap
+    fig, ax = plt.subplots(figsize=(10, 4))
+    im = ax.imshow(metrics_matrix, cmap='RdYlGn', aspect='auto', vmin=0, vmax=1)
+    
+    # Set ticks and labels
+    ax.set_xticks(np.arange(len(classes)))
+    ax.set_yticks(np.arange(3))
+    ax.set_xticklabels(classes, rotation=45, ha='right')
+    ax.set_yticklabels(['Precision', 'Recall', 'F1-Score'])
+    
+    # Add colorbar
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Score', rotation=270, labelpad=15)
+    
+    # Add text annotations
+    for i in range(3):
+        for j in range(len(classes)):
+            text = ax.text(j, i, f'{metrics_matrix[i, j]:.2f}',
+                          ha="center", va="center", color="black", fontsize=8)
+    
+    ax.set_title(f'Classification Metrics Heatmap (Accuracy: {class_report["accuracy"]:.1%})',
+                fontweight='bold', pad=15)
+    plt.tight_layout()
+    plt.savefig(fig_name, dpi=150, bbox_inches='tight')
     plt.show()
