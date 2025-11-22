@@ -22,9 +22,29 @@ data_transform = transforms.Compose([
 ])
 
 
+def str_to_bool(value: str) -> bool:
+    if isinstance(value, bool):
+        return value
+
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "t", "yes", "y"}:
+        return True
+    if normalized in {"0", "false", "f", "no", "n"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Boolean value expected, got '{value}'")
+
 parser = argparse.ArgumentParser(description="Train MobileNet on CIFAR-10 with options")
 parser.add_argument("--epochs", "-e", type=int, default=3, help="Number of training epochs (default: 3)")
 parser.add_argument("--percent", "-p", type=float, default=0.1, help="Fraction of dataset to use (0-1) or percent (1-100). Default=0.1 (10%%)")
+parser.add_argument(
+    "--save-best-model",
+    "-b",
+    nargs="?",
+    const=True,
+    default=False,
+    type=str_to_bool,
+    help="Save the best test-accuracy checkpoint during training instead of the final model",
+)
 args = parser.parse_args()
 
 cifar_train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=data_transform)
@@ -96,7 +116,10 @@ train_results = train(
     optimizer=optimizer,
     loss_fn=loss_fn,
     epochs=EPOCHS,
-    device=device
+    device=device,
+    save_best_model=args.save_best_model,
+    best_model_dir="models",
+    best_model_name="mobilenet_v3_small_sports.pth"
 )
 
 classification_report = calculate_metrics(
@@ -134,8 +157,9 @@ plot_classification_heatmap(
 )
 
 
-save_model(
-    model=model,
-    target_dir="models",
-    model_name="mobilenet_v3_small_sports.pth"
-)
+if not args.save_best_model:
+    save_model(
+        model=model,
+        target_dir="models",
+        model_name="mobilenet_v3_small_sports.pth"
+    )

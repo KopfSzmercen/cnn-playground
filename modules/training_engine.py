@@ -1,7 +1,8 @@
 from tqdm.auto import tqdm
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 import torch
 
+from modules.utils import save_model
 def train_step(
         model: torch.nn.Module,
         dataloader: torch.utils.data.DataLoader,
@@ -102,13 +103,16 @@ def test_step(
 
 def train(model: torch.nn.Module,
           train_dataloader: torch.utils.data.DataLoader,
-          test_dataloader: torch.utils.data.DataLoader, 
+          test_dataloader: torch.utils.data.DataLoader,
           optimizer: torch.optim.Optimizer,
           loss_fn: torch.nn.Module,
           epochs: int,
           device: torch.device,
+          save_best_model: bool = False,
+          best_model_dir: Optional[str] = None,
+          best_model_name: Optional[str] = None
           #writer: SummaryWriter
-          )-> Dict[str, List]:
+          ) -> Dict[str, List]:
     """
     Trains a PyTorch model.
 
@@ -120,6 +124,9 @@ def train(model: torch.nn.Module,
         loss_fn,
         epochs,
         device,
+        save_best_model: whether to persist the best test accuracy model during training.
+        best_model_dir: directory where the best model should be saved when requested.
+        best_model_name: filename to use when saving the best model.
         writer: TensorBoard SummaryWriter for logging metrics.
     
     Returns:
@@ -137,6 +144,9 @@ def train(model: torch.nn.Module,
         "test_loss": [],
         "test_acc": []
     }
+
+    best_test_acc = float("-inf")
+    should_save_best = save_best_model and best_model_dir and best_model_name
 
     for epoch in tqdm(range(epochs)):
 
@@ -167,6 +177,10 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
+
+        if should_save_best and test_acc > best_test_acc:
+            best_test_acc = test_acc
+            save_model(model=model, target_dir=best_model_dir, model_name=best_model_name)
     
     return results
     
