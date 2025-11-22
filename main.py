@@ -122,6 +122,11 @@ train_results = train(
     best_model_name="mobilenet_v3_small_sports.pth"
 )
 
+if args.save_best_model:
+    print("[INFORMATION] Loading best model for evaluation...")
+    best_model_path = os.path.join("models", "mobilenet_v3_small_sports.pth")
+    model.load_state_dict(torch.load(best_model_path, map_location=device))
+
 classification_report = calculate_metrics(
     model=model,
     dataloader=test_loader,
