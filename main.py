@@ -9,18 +9,18 @@ from modules.confusion_matrix import plot_confusion_matrix_from_model
 from torchinfo import summary
 import os
 import argparse
+from modules.tiny_vgg import TinyVGG
 
 from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
-
-model = torch.hub.load("pytorch/vision", "mobilenet_v3_small", weights="DEFAULT", skip_validation=True)
 
 data_transform = transforms.Compose([
     transforms.Resize((244, 244)),
     transforms.ToTensor()
 ])
 
+model = TinyVGG(input_shape=3, hidden_units=10, output_shape=10)
 
 def str_to_bool(value: str) -> bool:
     if isinstance(value, bool):
@@ -61,7 +61,8 @@ cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, percent)
 
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device="cpu"
 
 print("Using device: ", device)
 
@@ -84,24 +85,15 @@ view_random_N_dataloader_images(
     n=4
 )
 
-for param in model.features.parameters():
-    param.requires_grad = False
-
-model.classifier = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2, inplace=True),
-    torch.nn.Linear(in_features=576, out_features=len(class_names),bias=True)
-).to(device)
-
-
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
 EPOCHS = int(args.epochs)
 
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 224, 224),
+        input_size=(32, 3, 244, 244),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
@@ -119,7 +111,7 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="mobilenet_v3_small_sports.pth"
+    best_model_name="tiny_vgg.pth"
 )
 
 if args.save_best_model:
