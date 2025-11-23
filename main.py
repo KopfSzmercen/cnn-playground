@@ -1,5 +1,4 @@
 
-from modules.data_setup import create_dataloaders
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
 from torchvision import transforms, datasets
@@ -61,8 +60,7 @@ cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, percent)
 
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device="cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("Using device: ", device)
 
@@ -116,7 +114,7 @@ train_results = train(
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
-    best_model_path = os.path.join("models", "mobilenet_v3_small_sports.pth")
+    best_model_path = os.path.join("models", "tiny_vgg.pth")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
 classification_report = calculate_metrics(
@@ -158,5 +156,5 @@ if not args.save_best_model:
     save_model(
         model=model,
         target_dir="models",
-        model_name="mobilenet_v3_small_sports.pth"
+        model_name="tiny_vgg.pth"
     )
