@@ -122,6 +122,7 @@ train_results = train(
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
+print(f"Average time per epoch: {train_results['avg_epoch_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")

@@ -145,7 +145,8 @@ def train(model: torch.nn.Module,
         "train_acc": [],
         "test_loss": [],
         "test_acc": [],
-        "train_time": 0
+        "train_time": 0,
+        "avg_epoch_time": 0
     }
 
     best_test_acc = float("-inf")
@@ -189,6 +190,7 @@ def train(model: torch.nn.Module,
     
     end_time = time.time()
     results["train_time"] = end_time - start_time
+    results["avg_epoch_time"] = results["train_time"] / epochs
 
     return results
 
