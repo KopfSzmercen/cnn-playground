@@ -93,7 +93,7 @@ model.classifier = torch.nn.Sequential(
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
 EPOCHS = int(args.epochs)
 
@@ -118,7 +118,7 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="mobilenet_v3_small_sports.pth"
+    best_model_name="vgg.pth"
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
@@ -126,7 +126,7 @@ print(f"Average time per epoch: {train_results['avg_epoch_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
-    best_model_path = os.path.join("models", "mobilenet_v3_small_sports.pth")
+    best_model_path = os.path.join("models", "vgg.pth")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
 classification_report = calculate_metrics(
@@ -168,5 +168,5 @@ if not args.save_best_model:
     save_model(
         model=model,
         target_dir="models",
-        model_name="mobilenet_v3_small_sports.pth"
+        model_name="vgg.pth"
     )
