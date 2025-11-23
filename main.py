@@ -1,7 +1,6 @@
-from modules.data_setup import create_dataloaders
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
-from torchvision import transforms, datasets
+from torchvision import transforms, datasets, models
 import torch
 from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress, plot_classification_report, plot_classification_heatmap
 from modules.confusion_matrix import plot_confusion_matrix_from_model
@@ -13,10 +12,10 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-model = torch.hub.load("pytorch/vision", "mobilenet_v3_small", weights="DEFAULT", skip_validation=True)
+model = models.vgg16()
 
 data_transform = transforms.Compose([
-    transforms.Resize((244, 244)),
+    transforms.Resize((224, 224)),
     transforms.ToTensor()
 ])
 
@@ -83,12 +82,8 @@ view_random_N_dataloader_images(
     n=4
 )
 
-for param in model.features.parameters():
-    param.requires_grad = False
-
 model.classifier = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2, inplace=True),
-    torch.nn.Linear(in_features=576, out_features=len(class_names),bias=True)
+    torch.nn.Linear(in_features=25088, out_features=len(class_names),bias=True)
 ).to(device)
 
 
