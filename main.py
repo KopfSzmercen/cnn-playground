@@ -1,4 +1,3 @@
-
 from modules.data_setup import create_dataloaders
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
@@ -121,6 +120,8 @@ train_results = train(
     best_model_dir="models",
     best_model_name="mobilenet_v3_small_sports.pth"
 )
+
+print(f"Total training time: {train_results['train_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")

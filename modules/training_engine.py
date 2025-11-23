@@ -1,6 +1,7 @@
 from tqdm.auto import tqdm
 from typing import Dict, List, Optional, Tuple
 import torch
+import time
 
 from modules.utils import save_model
 def train_step(
@@ -135,18 +136,22 @@ def train(model: torch.nn.Module,
             {train_loss: [2.0616, 1.0537],
                   train_acc: [0.3945, 0.3945],
                   test_loss: [1.2641, 1.5706],
-                  test_acc: [0.3400, 0.2973]} 
+                  test_acc: [0.3400, 0.2973],
+                  train_time: 123.45} 
     """
 
     results = {
         "train_loss": [],
         "train_acc": [],
         "test_loss": [],
-        "test_acc": []
+        "test_acc": [],
+        "train_time": 0
     }
 
     best_test_acc = float("-inf")
     should_save_best = save_best_model and best_model_dir and best_model_name
+
+    start_time = time.time()
 
     for epoch in tqdm(range(epochs)):
 
@@ -182,8 +187,11 @@ def train(model: torch.nn.Module,
             best_test_acc = test_acc
             save_model(model=model, target_dir=best_model_dir, model_name=best_model_name)
     
+    end_time = time.time()
+    results["train_time"] = end_time - start_time
+
     return results
-    
-    
+
+
 
 
