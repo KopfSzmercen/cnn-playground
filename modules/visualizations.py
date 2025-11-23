@@ -57,6 +57,7 @@ def plot_train_val_progress(
     plt.title("Train and Test Loss")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
+    plt.legend()
 
     epochs = range(len(train_results["train_loss"]))
     plt.xticks(epochs)
