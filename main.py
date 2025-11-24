@@ -15,7 +15,6 @@ from modules.metrics import calculate_metrics
 BATCH_SIZE = 32
 
 data_transform = transforms.Compose([
-    transforms.Resize((244, 244)),
     transforms.ToTensor()
 ])
 
@@ -91,7 +90,7 @@ EPOCHS = int(args.epochs)
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 244, 244),
+        input_size=(32, 3, 32, 32),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
