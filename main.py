@@ -124,7 +124,7 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="resent.pth"
+    best_model_name="resnet.pth"
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
