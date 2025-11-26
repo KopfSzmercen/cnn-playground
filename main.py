@@ -1,24 +1,29 @@
 from modules.data_setup import create_dataloaders
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
-from torchvision import transforms, datasets
+from torchvision import transforms, datasets, models
 import torch
 from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress, plot_classification_report, plot_classification_heatmap
 from modules.confusion_matrix import plot_confusion_matrix_from_model
 from torchinfo import summary
 import os
 import argparse
+import torch.nn as nn
 
 from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-model = torch.hub.load("pytorch/vision", "mobilenet_v3_small", weights="DEFAULT", skip_validation=True)
+model = models.resnet18()
 
 data_transform = transforms.Compose([
-    transforms.Resize((244, 244)),
     transforms.ToTensor()
 ])
+
+model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+model.maxpool = nn.Identity()
+
+model.fc = nn.Linear(model.fc.in_features, 10)
 
 
 def str_to_bool(value: str) -> bool:
@@ -83,11 +88,10 @@ view_random_N_dataloader_images(
     n=4
 )
 
-for param in model.features.parameters():
-    param.requires_grad = False
+for param in model.parameters():
+    param.requires_grad = True
 
 model.classifier = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2, inplace=True),
     torch.nn.Linear(in_features=576, out_features=len(class_names),bias=True)
 ).to(device)
 
@@ -118,7 +122,7 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="mobilenet_v3_small_sports.pth"
+    best_model_name="resent.pth"
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
@@ -126,7 +130,7 @@ print(f"Average time per epoch: {train_results['avg_epoch_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
-    best_model_path = os.path.join("models", "mobilenet_v3_small_sports.pth")
+    best_model_path = os.path.join("models", "resnet.pth")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
 classification_report = calculate_metrics(
@@ -168,5 +172,5 @@ if not args.save_best_model:
     save_model(
         model=model,
         target_dir="models",
-        model_name="mobilenet_v3_small_sports.pth"
+        model_name="resnet.pth"
     )
