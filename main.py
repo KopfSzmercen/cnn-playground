@@ -20,8 +20,10 @@ data_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
+# Modify ResNet for 32x32 images (CIFAR-10)
 model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-model.maxpool = nn.Identity()
+model.maxpool = nn.Identity()  # Remove max pooling to preserve spatial dimensions
+model.avgpool = nn.AdaptiveAvgPool2d((1, 1))  # Use adaptive pooling at the end
 
 model.fc = nn.Linear(model.fc.in_features, 10)
 
@@ -104,7 +106,7 @@ EPOCHS = int(args.epochs)
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 224, 224),
+        input_size=(32, 3, 32, 32),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
