@@ -1,3 +1,4 @@
+
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
 from torchvision import transforms, datasets
@@ -14,7 +15,6 @@ from modules.metrics import calculate_metrics
 BATCH_SIZE = 32
 
 data_transform = transforms.Compose([
-    transforms.Resize((64, 64)),
     transforms.ToTensor()
 ])
 
@@ -31,7 +31,7 @@ def str_to_bool(value: str) -> bool:
         return False
     raise argparse.ArgumentTypeError(f"Boolean value expected, got '{value}'")
 
-parser = argparse.ArgumentParser(description="Train TinyVGG on Imagenette with options")
+parser = argparse.ArgumentParser(description="Train MobileNet on CIFAR-10 with options")
 parser.add_argument("--epochs", "-e", type=int, default=3, help="Number of training epochs (default: 3)")
 parser.add_argument("--percent", "-p", type=float, default=0.1, help="Fraction of dataset to use (0-1) or percent (1-100). Default=0.1 (10%%)")
 parser.add_argument(
@@ -45,10 +45,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# cifar_train_dataset = datasets.Imagenette(root='./data', split="train", download=True, transform=data_transform)
-imagenette_train_dataset = datasets.Imagenette(root='./data', split="train", download=True, transform=data_transform)
-# cifar_test_dataset = datasets.Imagenette(root='./data', split="val", download=True, transform=data_transform)
-imagenette_test_dataset = datasets.Imagenette(root='./data', split="val", download=True, transform=data_transform)
+cifar_train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=data_transform)
+cifar_test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=data_transform)
 
 percent = float(args.percent)
 if percent > 1:
@@ -56,17 +54,10 @@ if percent > 1:
 if percent <= 0 or percent > 1:
     raise ValueError("`--percent` must be in range (0, 1] when given as fraction or (0,100] when given as percentage")
 
-# cifar_train_dataset = create_truncated_dataset(cifar_train_dataset, percent)
-imagenette_train_dataset = create_truncated_dataset(imagenette_train_dataset, percent)
-# cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, percent)
-imagenette_test_dataset = create_truncated_dataset(imagenette_test_dataset, percent)
+cifar_train_dataset = create_truncated_dataset(cifar_train_dataset, percent)
+cifar_test_dataset = create_truncated_dataset(cifar_test_dataset, percent)
 
-# class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-# Prefer to derive class names from the Imagenette dataset (fall back to numbered classes)
-if hasattr(imagenette_train_dataset, "classes"):
-    class_names = imagenette_train_dataset.classes
-else:
-    class_names = [f"class_{i}" for i in range(10)]
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -75,13 +66,13 @@ print("Using device: ", device)
 model.to(device)
 
 train_loader = torch.utils.data.DataLoader(
-    imagenette_train_dataset,
+    cifar_train_dataset,
     batch_size=BATCH_SIZE,
     shuffle=True
 )
 
 test_loader = torch.utils.data.DataLoader(
-    imagenette_test_dataset,
+    cifar_test_dataset,
     batch_size=BATCH_SIZE,
     shuffle=False
 )
@@ -92,14 +83,14 @@ view_random_N_dataloader_images(
 )
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
 EPOCHS = int(args.epochs)
 
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 64, 64),
+        input_size=(32, 3, 32, 32),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
