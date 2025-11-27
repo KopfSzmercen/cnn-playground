@@ -3,6 +3,7 @@ from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
 from torchvision import transforms, datasets
 import torch
+import time
 from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress, plot_classification_report, plot_classification_heatmap
 from modules.confusion_matrix import plot_confusion_matrix_from_model
 from torchinfo import summary
@@ -97,6 +98,7 @@ summary(model,
         row_settings=["var_names"]
 )
 
+start_time = time.time()
 
 train_results = train(
     model=model,
@@ -110,6 +112,9 @@ train_results = train(
     best_model_dir="models",
     best_model_name="tiny_vgg.pth"
 )
+
+end_time = time.time()
+total_train_time = end_time - start_time
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
@@ -157,3 +162,6 @@ if not args.save_best_model:
         target_dir="models",
         model_name="tiny_vgg.pth"
     )
+
+print(f"Total training time: {total_train_time:.2f} seconds")
+print(f"Average training time per epoch: {total_train_time / EPOCHS:.2f} seconds")
