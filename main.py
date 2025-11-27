@@ -83,7 +83,7 @@ view_random_N_dataloader_images(
 )
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 EPOCHS = int(args.epochs)
 
