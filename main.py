@@ -15,7 +15,6 @@ BATCH_SIZE = 32
 model = models.vgg16()
 
 data_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
     transforms.ToTensor()
 ])
 
@@ -82,20 +81,21 @@ view_random_N_dataloader_images(
     n=4
 )
 
+model.avgpool = torch.nn.Identity()
 model.classifier = torch.nn.Sequential(
-    torch.nn.Linear(in_features=25088, out_features=len(class_names),bias=True)
+    torch.nn.Linear(in_features=512, out_features=len(class_names), bias=True)
 ).to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 EPOCHS = int(args.epochs)
 
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 224, 224),
+        input_size=(32, 3, 32, 32),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
