@@ -109,6 +109,7 @@ def train(model: torch.nn.Module,
           loss_fn: torch.nn.Module,
           epochs: int,
           device: torch.device,
+          scheduler: torch.optim.lr_scheduler.LRScheduler = None,
           save_best_model: bool = False,
           best_model_dir: Optional[str] = None,
           best_model_name: Optional[str] = None
@@ -183,6 +184,12 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
+
+        if scheduler:
+            if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step(test_loss)
+            else:
+                scheduler.step()
 
         if should_save_best and test_acc > best_test_acc:
             best_test_acc = test_acc

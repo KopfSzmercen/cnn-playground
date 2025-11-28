@@ -88,7 +88,8 @@ model.classifier = torch.nn.Sequential(
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, verbose=True)
 
 EPOCHS = int(args.epochs)
 
@@ -111,6 +112,7 @@ train_results = train(
     loss_fn=loss_fn,
     epochs=EPOCHS,
     device=device,
+    scheduler=scheduler,
     save_best_model=args.save_best_model,
     best_model_dir="models",
     best_model_name="vgg.pth"
