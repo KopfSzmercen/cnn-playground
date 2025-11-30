@@ -98,7 +98,7 @@ model.classifier = torch.nn.Sequential(
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 EPOCHS = int(args.epochs)
 
