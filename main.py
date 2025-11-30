@@ -81,9 +81,10 @@ view_random_N_dataloader_images(
     n=4
 )
 
+model.features[4] = torch.nn.Identity()
 model.avgpool = torch.nn.Identity()
 model.classifier = torch.nn.Sequential(
-    torch.nn.Linear(512, 512),
+    torch.nn.Linear(2048, 512),
     torch.nn.ReLU(),
     torch.nn.Dropout(p=0.5),
     torch.nn.Linear(512, 10)
