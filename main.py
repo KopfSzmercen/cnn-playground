@@ -20,12 +20,11 @@ data_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# Modify ResNet for 32x32 images (CIFAR-10)
 model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-model.maxpool = nn.Identity()  # Remove max pooling to preserve spatial dimensions
-model.avgpool = nn.AdaptiveAvgPool2d((1, 1))  # Use adaptive pooling at the end
+model.maxpool = nn.Identity()
+model.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-model.fc = nn.Linear(model.fc.in_features, 10)
+model.fc = nn.Linear(512, 10)
 
 
 def str_to_bool(value: str) -> bool:
