@@ -83,13 +83,15 @@ view_random_N_dataloader_images(
 
 model.avgpool = torch.nn.Identity()
 model.classifier = torch.nn.Sequential(
-    torch.nn.Linear(in_features=512, out_features=len(class_names), bias=True)
+    torch.nn.Linear(512, 512),
+    torch.nn.ReLU(),
+    torch.nn.Dropout(p=0.5),
+    torch.nn.Linear(512, 10)
 ).to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 EPOCHS = int(args.epochs)
 
@@ -112,7 +114,7 @@ train_results = train(
     loss_fn=loss_fn,
     epochs=EPOCHS,
     device=device,
-    scheduler=scheduler,
+    scheduler=None,
     save_best_model=args.save_best_model,
     best_model_dir="models",
     best_model_name="vgg.pth"
