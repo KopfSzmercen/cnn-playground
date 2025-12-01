@@ -1,7 +1,7 @@
 from modules.data_setup import create_dataloaders
 from modules.training_engine import train
 from modules.utils import save_model, create_truncated_dataset
-from torchvision import transforms, datasets
+from torchvision import transforms, datasets, models
 import torch
 from modules.visualizations import view_random_N_dataloader_images, plot_train_val_progress, plot_classification_report, plot_classification_heatmap
 from modules.confusion_matrix import plot_confusion_matrix_from_model
@@ -13,10 +13,17 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-model = torch.hub.load("pytorch/vision", "mobilenet_v3_small", weights="DEFAULT", skip_validation=True)
+model = models.VisionTransformer(
+    image_size=32,
+    patch_size=4,
+    num_layers=12,
+    num_heads=12,
+    hidden_dim=768,
+    mlp_dim=3072,
+    num_classes=10
+)
 
 data_transform = transforms.Compose([
-    transforms.Resize((244, 244)),
     transforms.ToTensor()
 ])
 
@@ -83,24 +90,16 @@ view_random_N_dataloader_images(
     n=4
 )
 
-for param in model.features.parameters():
-    param.requires_grad = False
-
-model.classifier = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2, inplace=True),
-    torch.nn.Linear(in_features=576, out_features=len(class_names),bias=True)
-).to(device)
-
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
 EPOCHS = int(args.epochs)
 
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 224, 224),
+        input_size=(32, 3, 32, 32),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
@@ -118,7 +117,7 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="mobilenet_v3_small_sports.pth"
+    best_model_name="vit_b_16_cifar10.pth"
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
@@ -126,7 +125,7 @@ print(f"Average time per epoch: {train_results['avg_epoch_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
-    best_model_path = os.path.join("models", "mobilenet_v3_small_sports.pth")
+    best_model_path = os.path.join("models", "vit_b_16_cifar10.pth")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
 classification_report = calculate_metrics(
@@ -168,5 +167,5 @@ if not args.save_best_model:
     save_model(
         model=model,
         target_dir="models",
-        model_name="mobilenet_v3_small_sports.pth"
+        model_name="vit_b_16_cifar10.pth"
     )
