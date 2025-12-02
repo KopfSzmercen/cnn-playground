@@ -15,8 +15,16 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
+#https://www.kaggle.com/code/farzadnekouei/cifar-10-image-classification-with-cnn
 data_transform = transforms.Compose([
-    transforms.ToTensor()
+    transforms.RandomRotation(degrees=15),
+    transforms.RandomAffine(degrees=0, translate=(0.12, 0.12)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomResizedCrop(size=32, scale=(0.9, 1.0)),
+    transforms.ColorJitter(brightness=0.1),
+    transforms.ToTensor(),
+    transforms.Lambda(lambda img: img + torch.randn_like(img) * 0.1),
+    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
 ])
 
 model = TinyVGG(input_shape=3, hidden_units=10, output_shape=10)
