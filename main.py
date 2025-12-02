@@ -17,9 +17,9 @@ model = models.VisionTransformer(
     image_size=32,
     patch_size=4,
     num_layers=12,
-    num_heads=12,
-    hidden_dim=768,
-    mlp_dim=3072,
+    num_heads=3,
+    hidden_dim=192,
+    mlp_dim=768,
     num_classes=10
 )
 
