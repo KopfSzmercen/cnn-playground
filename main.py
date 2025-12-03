@@ -28,17 +28,6 @@ test_transform = transforms.Compose([
     transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
 ])
 
-data_transform = transforms.Compose([
-    transforms.RandomRotation(degrees=15),
-    transforms.RandomAffine(degrees=0, translate=(0.12, 0.12)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomResizedCrop(size=32, scale=(0.9, 1.0)),
-    transforms.ColorJitter(brightness=0.1),
-    transforms.ToTensor(),
-    transforms.Lambda(lambda img: img + torch.randn_like(img) * 0.1),
-    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
-])
-
 
 def str_to_bool(value: str) -> bool:
     if isinstance(value, bool):
