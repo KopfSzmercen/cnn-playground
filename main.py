@@ -15,17 +15,20 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-#https://www.kaggle.com/code/farzadnekouei/cifar-10-image-classification-with-cnn
-data_transform = transforms.Compose([
-    transforms.RandomRotation(degrees=15),
-    transforms.RandomAffine(degrees=0, translate=(0.12, 0.12)),
+# Training augmentation
+train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
-    transforms.RandomResizedCrop(size=32, scale=(0.9, 1.0)),
-    transforms.ColorJitter(brightness=0.1),
+    transforms.RandomCrop(32, padding=4),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     transforms.ToTensor(),
-    transforms.Lambda(lambda img: img + torch.randn_like(img) * 0.1),
     transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
 ])
+
+test_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+])
+
 
 model = TinyVGG(input_shape=3, hidden_units=10, output_shape=10)
 
@@ -54,8 +57,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-cifar_train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=data_transform)
-cifar_test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=data_transform)
+cifar_train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
+cifar_test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
 
 percent = float(args.percent)
 if percent > 1:
