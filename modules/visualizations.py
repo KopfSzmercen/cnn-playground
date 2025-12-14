@@ -51,6 +51,15 @@ def plot_train_val_progress(
     """
     plt.figure(figsize=(10, 8))
 
+    num_epochs = len(train_results["train_loss"])
+    
+    # Adjust ticks if too many epochs
+    if num_epochs > 30:
+        step = max(1, num_epochs // 15)  # Aim for roughly 15 ticks
+        ticks = range(0, num_epochs, step)
+    else:
+        ticks = range(num_epochs)
+
     plt.subplot(2, 1, 1)
     plt.plot(train_results["train_loss"], label="train_loss")
     plt.plot(train_results["test_loss"], label="test_loss")
@@ -59,8 +68,7 @@ def plot_train_val_progress(
     plt.ylabel("Loss")
     plt.legend()
 
-    epochs = range(len(train_results["train_loss"]))
-    plt.xticks(epochs)
+    plt.xticks(ticks)
 
     plt.subplot(2, 1, 2)
     plt.plot(train_results["train_acc"], label="train_acc")
@@ -69,7 +77,7 @@ def plot_train_val_progress(
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
 
-    plt.xticks(epochs)
+    plt.xticks(ticks)
 
     plt.legend()
 
