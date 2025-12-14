@@ -1,0 +1,2 @@
+Total training time: 1270.31 seconds
+Average training time per epoch: 42.34 seconds
