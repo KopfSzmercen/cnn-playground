@@ -110,7 +110,8 @@ def train(model: torch.nn.Module,
           device: torch.device,
           save_best_model: bool = False,
           best_model_dir: Optional[str] = None,
-          best_model_name: Optional[str] = None
+          best_model_name: Optional[str] = None,
+          scheduler: Optional[object] = None
           #writer: SummaryWriter
           ) -> Dict[str, List]:
     """
@@ -127,6 +128,7 @@ def train(model: torch.nn.Module,
         save_best_model: whether to persist the best test accuracy model during training.
         best_model_dir: directory where the best model should be saved when requested.
         best_model_name: filename to use when saving the best model.
+        scheduler: learning rate scheduler (optional)
         writer: TensorBoard SummaryWriter for logging metrics.
     
     Returns:
@@ -164,6 +166,12 @@ def train(model: torch.nn.Module,
             loss_fn=loss_fn,
             device=device
         )
+
+        if scheduler:
+            if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step(test_loss)
+            else:
+                scheduler.step()
 
         print(
           f"Epoch: {epoch+1} | "
