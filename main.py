@@ -100,7 +100,15 @@ view_random_N_dataloader_images(
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, 
+    mode='min', 
+    patience=5, 
+    factor=0.1
+)
 
 EPOCHS = int(args.epochs)
 
@@ -125,7 +133,8 @@ train_results = train(
     device=device,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="vit_b_16_cifar10.pth"
+    best_model_name="vit_b_16_cifar10.pth",
+    scheduler=scheduler
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")

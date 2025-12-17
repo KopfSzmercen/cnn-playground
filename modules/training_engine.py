@@ -111,7 +111,8 @@ def train(model: torch.nn.Module,
           device: torch.device,
           save_best_model: bool = False,
           best_model_dir: Optional[str] = None,
-          best_model_name: Optional[str] = None
+          best_model_name: Optional[str] = None,
+          scheduler = None
           #writer: SummaryWriter
           ) -> Dict[str, List]:
     """
@@ -183,6 +184,9 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
+
+        if scheduler is not None:
+            scheduler.step(test_loss)
 
         if should_save_best and test_acc > best_test_acc:
             best_test_acc = test_acc
