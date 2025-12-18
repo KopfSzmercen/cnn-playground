@@ -12,20 +12,22 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-model = models.vgg16()
+weights = models.VGG16_Weights.DEFAULT
+model = models.vgg16(weights=weights)
 
-# Training augmentation
 train_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomCrop(32, padding=4),
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 test_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 
@@ -91,14 +93,13 @@ view_random_N_dataloader_images(
     n=4
 )
 
-model.features[4] = torch.nn.Identity()
-model.avgpool = torch.nn.Identity()
-model.classifier = torch.nn.Sequential(
-    torch.nn.Linear(2048, 512),
-    torch.nn.ReLU(),
-    torch.nn.Dropout(p=0.5),
-    torch.nn.Linear(512, 10)
-).to(device)
+
+for param in model.features.parameters():
+    param.requires_grad = False
+
+model.classifier[6] = torch.nn.Linear(4096, 10)
+
+model.to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -116,7 +117,7 @@ EPOCHS = int(args.epochs)
 print(f"Using epochs={EPOCHS}, dataset fraction={percent}")
 
 summary(model, 
-        input_size=(32, 3, 32, 32),
+        input_size=(32, 3, 224, 224),
         verbose=1,
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
