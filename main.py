@@ -12,8 +12,8 @@ from modules.metrics import calculate_metrics
 
 BATCH_SIZE = 32
 
-weights = models.VGG16_Weights.DEFAULT
-model = models.vgg16(weights=weights)
+weights = models.ResNet18_Weights.DEFAULT
+model = models.resnet18(weights=weights)
 
 train_transform = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
@@ -42,7 +42,7 @@ def str_to_bool(value: str) -> bool:
         return False
     raise argparse.ArgumentTypeError(f"Boolean value expected, got '{value}'")
 
-parser = argparse.ArgumentParser(description="Train VGG16 on CIFAR-10 with options")
+parser = argparse.ArgumentParser(description="Train ResNet18 on CIFAR-10 with options")
 parser.add_argument("--epochs", "-e", type=int, default=3, help="Number of training epochs (default: 3)")
 parser.add_argument("--percent", "-p", type=float, default=0.1, help="Fraction of dataset to use (0-1) or percent (1-100). Default=0.1 (10%%)")
 parser.add_argument(
@@ -94,22 +94,23 @@ view_random_N_dataloader_images(
 )
 
 
-for param in model.features.parameters():
+for param in model.parameters():
     param.requires_grad = False
 
-# Unfreeze the last convolutional block (Block 5) for fine-tuning
-for param in model.features[24:].parameters():
+# Unfreeze the last convolutional block (Layer 4) for fine-tuning
+for param in model.layer4.parameters():
     param.requires_grad = True
 
-model.classifier[6] = torch.nn.Linear(4096, 10)
+num_ftrs = model.fc.in_features
+model.fc = torch.nn.Linear(num_ftrs, 10)
 
 model.to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD([
-    {'params': model.features[24:].parameters(), 'lr': 1e-4},
-    {'params': model.classifier.parameters(), 'lr': 0.01}
+    {'params': model.layer4.parameters(), 'lr': 1e-4},
+    {'params': model.fc.parameters(), 'lr': 0.01}
 ], momentum=0.9, weight_decay=1e-4)
 
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -143,7 +144,7 @@ train_results = train(
     scheduler=scheduler,
     save_best_model=args.save_best_model,
     best_model_dir="models",
-    best_model_name="vgg.pth"
+    best_model_name="resnet.pth"
 )
 
 print(f"Total training time: {train_results['train_time']:.2f} seconds")
@@ -151,7 +152,7 @@ print(f"Average time per epoch: {train_results['avg_epoch_time']:.2f} seconds")
 
 if args.save_best_model:
     print("[INFORMATION] Loading best model for evaluation...")
-    best_model_path = os.path.join("models", "vgg.pth")
+    best_model_path = os.path.join("models", "resnet.pth")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
 classification_report = calculate_metrics(
@@ -193,5 +194,5 @@ if not args.save_best_model:
     save_model(
         model=model,
         target_dir="models",
-        model_name="vgg.pth"
+        model_name="resnet.pth"
     )
