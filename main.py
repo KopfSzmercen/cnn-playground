@@ -42,7 +42,7 @@ def str_to_bool(value: str) -> bool:
         return False
     raise argparse.ArgumentTypeError(f"Boolean value expected, got '{value}'")
 
-parser = argparse.ArgumentParser(description="Train MobileNet on CIFAR-10 with options")
+parser = argparse.ArgumentParser(description="Train VGG16 on CIFAR-10 with options")
 parser.add_argument("--epochs", "-e", type=int, default=3, help="Number of training epochs (default: 3)")
 parser.add_argument("--percent", "-p", type=float, default=0.1, help="Fraction of dataset to use (0-1) or percent (1-100). Default=0.1 (10%%)")
 parser.add_argument(
@@ -97,13 +97,20 @@ view_random_N_dataloader_images(
 for param in model.features.parameters():
     param.requires_grad = False
 
+# Unfreeze the last convolutional block (Block 5) for fine-tuning
+for param in model.features[24:].parameters():
+    param.requires_grad = True
+
 model.classifier[6] = torch.nn.Linear(4096, 10)
 
 model.to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.classifier.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
+optimizer = torch.optim.SGD([
+    {'params': model.features[24:].parameters(), 'lr': 1e-4},
+    {'params': model.classifier.parameters(), 'lr': 0.01}
+], momentum=0.9, weight_decay=1e-4)
 
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, 
