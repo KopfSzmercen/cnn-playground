@@ -16,9 +16,9 @@ weights = models.VGG16_Weights.DEFAULT
 model = models.vgg16(weights=weights)
 
 train_transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
     transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop(32, padding=4),
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -103,7 +103,7 @@ model.to(device)
 
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.classifier.parameters(), lr=1e-3, momentum=0.9, weight_decay=1e-4)
+optimizer = torch.optim.SGD(model.classifier.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, 
