@@ -17,16 +17,11 @@ BATCH_SIZE = 32
 
 # Training augmentation
 train_transform = transforms.Compose([
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop(32, padding=4),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    transforms.ToTensor()
 ])
 
 test_transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
+    transforms.ToTensor()
 ])
 
 
@@ -95,7 +90,7 @@ view_random_N_dataloader_images(
 )
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
 EPOCHS = int(args.epochs)
 
