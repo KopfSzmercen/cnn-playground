@@ -58,8 +58,13 @@ def plot_train_val_progress(
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
 
-    epochs = range(len(train_results["train_loss"]))
-    plt.xticks(epochs)
+    n_epochs = len(train_results["train_loss"])
+    epochs = range(n_epochs)
+    stride = max(1, n_epochs // 20)
+    tick_positions = list(range(0, n_epochs, stride))
+    if (n_epochs - 1) not in tick_positions:
+        tick_positions.append(n_epochs - 1)
+    plt.xticks(tick_positions)
     plt.legend()
 
     plt.subplot(2, 1, 2)
@@ -69,7 +74,7 @@ def plot_train_val_progress(
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
 
-    plt.xticks(epochs)
+    plt.xticks(tick_positions)
 
     plt.legend()
 
