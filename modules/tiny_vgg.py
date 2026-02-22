@@ -13,6 +13,7 @@ class TinyVGG(nn.Module):
                 stride=1,
                 padding=1
             ),
+            nn.BatchNorm2d(hidden_units),
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=hidden_units,
@@ -21,6 +22,7 @@ class TinyVGG(nn.Module):
                 stride=1,
                 padding=1
             ),
+            nn.BatchNorm2d(hidden_units),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
@@ -33,6 +35,7 @@ class TinyVGG(nn.Module):
                 stride=1,
                 padding=1
             ),
+            nn.BatchNorm2d(hidden_units),
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=hidden_units,
@@ -41,6 +44,7 @@ class TinyVGG(nn.Module):
                 stride=1,
                 padding=1
             ),
+            nn.BatchNorm2d(hidden_units),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
